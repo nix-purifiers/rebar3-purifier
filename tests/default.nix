@@ -136,9 +136,12 @@ in
       ''{"hello":"Nix"}'';
 
   # The release starts, with the ERTS it includes, prints and stops. The
-  # start script prints the command it runs first.
+  # start script prints the command it runs first. Each release check
+  # registers its node with an epmd on a port of its own: darwin builds
+  # share the host's network, and a release check that registers with the
+  # epmd another build started fails when that build ends.
   fixture-hello-release = runCommand "fixture-hello-release" { } ''
-    HOME=$TMPDIR HELLO_ONESHOT=1 ${lib.getExe hello.packages.release-hello} foreground > actual
+    HOME=$TMPDIR HELLO_ONESHOT=1 ERL_EPMD_PORT=43691 ${lib.getExe hello.packages.release-hello} foreground > actual
     grep -qx '{"hello":"release"}' actual
     touch $out
   '';
@@ -191,7 +194,7 @@ in
   fixture-umbrella-build = umbrella.packages.default;
 
   fixture-umbrella-release = runCommand "fixture-umbrella-release" { } ''
-    HOME=$TMPDIR SERVER_ONESHOT=1 ${lib.getExe umbrella.packages.release-umbrella} foreground > actual
+    HOME=$TMPDIR SERVER_ONESHOT=1 ERL_EPMD_PORT=43692 ${lib.getExe umbrella.packages.release-umbrella} foreground > actual
     grep -qx 'Hello, Nix (recon 2.5.6, opentelemetry_api 1.5.0)' actual
     touch $out
   '';

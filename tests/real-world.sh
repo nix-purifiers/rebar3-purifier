@@ -49,7 +49,9 @@ case "$project" in
     ;;
 esac
 
-src="$work/$project"
+# The physical path: builtins.readFileType refuses a path through a
+# symlink, such as macOS's /var.
+src="$(cd "$work" && pwd -P)/$project"
 git clone -q "$url" "$src"
 cd "$src"
 git checkout -q "$rev"

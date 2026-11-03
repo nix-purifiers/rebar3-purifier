@@ -214,6 +214,11 @@ let
     // {
       pname = firstApp.name;
 
+      # The .beam files leave out the build directory's paths, which are
+      # not a fixed /build on every platform, so a rebuild matches. As
+      # nixpkgs' buildRebar3 does.
+      ERL_COMPILER_OPTIONS = "[deterministic]";
+
       buildPhase = ''
         runHook preBuild
         rebar3 compile
