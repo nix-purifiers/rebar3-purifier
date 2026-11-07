@@ -73,16 +73,23 @@ test -z "$(REBAR3_PURIFIER=0 rebar3-purifier env)"
 # REBAR3_PURIFIER_TOOL_LOCKFILE for the interactive rebar3. `lock` starts
 # from the rebar.lock in the project, writes both lockfiles outside it, and
 # leaves the rebar.lock in the project as it is.
+# Resolve unversioned plugins independently in an ordinary fresh capture
+# too, rather than comparing current resolution with a historical lock.
+# The earlier hello checks still use the unchanged seeded fixture.
 mkdir -p "$work/external/locks"
+cp -r "$here/fixtures/hello" "$work/ordinary"
 cp -r "$here/fixtures/hello" "$work/external/project"
-chmod -R u+w "$work/external"
+chmod -R u+w "$work/ordinary" "$work/external"
+rm "$work/ordinary/rebar3-purifier.lock.json"
 rm "$work/external/project/rebar3-purifier.lock.json"
+(cd "$work/ordinary" && rebar3-purifier lock)
+cmp "$work/ordinary/rebar.lock" "$here/fixtures/hello/rebar.lock"
 cd "$work/external/project"
 cp rebar.lock "$work/external/rebar.lock.before"
 rebar3-purifier lock --lockfile ../locks/rebar3-purifier.lock.json \
   --tool-lockfile ../locks/rebar.lock
-cmp ../locks/rebar3-purifier.lock.json "$here/fixtures/hello/rebar3-purifier.lock.json"
-cmp ../locks/rebar.lock "$here/fixtures/hello/rebar.lock"
+cmp ../locks/rebar3-purifier.lock.json "$work/ordinary/rebar3-purifier.lock.json"
+cmp ../locks/rebar.lock "$work/ordinary/rebar.lock"
 cmp rebar.lock "$work/external/rebar.lock.before"
 rebar3-purifier prefetch --lockfile ../locks/rebar3-purifier.lock.json \
   --tool-lockfile ../locks/rebar.lock
