@@ -2,14 +2,18 @@
 %%
 %% The lock run of `rebar3-purifier lock` and `rebar3-purifier update`. It
 %% copies the build to _build/rebar3-purifier/lock-run, runs rebar3 there
-%% with an empty home and cache and with the network, once per locked
-%% profile, and records what rebar3 downloaded and what the build
+%% with an empty home, once per locked profile, and records the native
+%% downloads and what the build
 %% produces in rebar3-purifier.lock.json. `lock` keeps the resolution of
 %% rebar.lock, to which rebar3 adds only what is missing. `update` first
-%% runs `rebar3 upgrade` on every dependency, or on the named ones.
+%% runs `rebar3 upgrade` on every dependency, or on the named ones. First
+%% captures and updates resolve online; unchanged normal relocks replay
+%% the recorded native cache and index so plugin selections stay pinned.
 -module(rp_lock).
 
--export([lock/1, update/1, repo_url/2, global_config_dir/0, https_url/1, hex_entries/2]).
+-export([
+    lock/1, update/1, repo_url/2, global_config_dir/0, https_url/1, hex_entries/2, capture_mode/3
+]).
 
 -define(DEFAULT_PROFILES, ["default", "test", "prod"]).
 
@@ -43,6 +47,7 @@ options([], Profiles, Packages) ->
 write_lock(#{root := Root, lock_file := LockFile, rebar_lock := RebarLock} = P, Profiles, Upgrade) ->
     filelib:is_regular(filename:join(Root, "rebar.config")) orelse
         rp_util:fail("no rebar.config in ~ts", [Root]),
+    Mode = capture_mode(P, Profiles, Upgrade),
     Work = filename:join([Root, "_build", "rebar3-purifier", "lock-run"]),
     Project = filename:join(Work, "project"),
     Cache = filename:join(Work, "cache"),
@@ -53,13 +58,18 @@ write_lock(#{root := Root, lock_file := LockFile, rebar_lock := RebarLock} = P, 
         true -> {ok, _} = file:copy(RebarLock, filename:join(Project, "rebar.lock"));
         false -> ok
     end,
-    Env = [
-        {"HOME", filename:join(Work, "home")},
-        {"REBAR_CACHE_DIR", Cache},
-        %% The user's global rebar3 configuration stays in effect, for the
-        %% Hex repositories and credentials it may hold.
-        {"REBAR_GLOBAL_CONFIG_DIR", global_config_dir()}
-    ],
+    CacheEnv =
+        case Mode of
+            fresh -> [{"REBAR_CACHE_DIR", Cache}];
+            replay -> rp_wrapper:capture_env(P, Cache)
+        end,
+    Env =
+        [
+            {"HOME", filename:join(Work, "home")},
+            %% The user's global rebar3 configuration stays in effect, for the
+            %% Hex repositories and credentials it may hold.
+            {"REBAR_GLOBAL_CONFIG_DIR", global_config_dir()}
+        ] ++ CacheEnv,
     case Upgrade of
         none -> ok;
         all -> rebar3(["upgrade", "--all"], Project, Env);
@@ -97,6 +107,30 @@ write_lock(#{root := Root, lock_file := LockFile, rebar_lock := RebarLock} = P, 
     rp_util:ensure_dir(filename:dirname(LockFile)),
     rp_util:write_lock(LockFile, Lock),
     io:format("wrote ~ts~n", [LockFile]).
+
+%% A native rebar.lock does not pin plugins. An unchanged normal relock
+%% therefore needs the recorded index, tarballs and git sources as well.
+%% Validate an existing lock even for update: corrupted pins never select
+%% an online fallback. Only absent or legitimately changed inputs are fresh.
+capture_mode(
+    #{root := Root, lock_file := LockFile, rebar_lock := RebarLock} = P, Profiles, Upgrade
+) ->
+    case rp_util:read_lock(LockFile) of
+        {error, enoent} ->
+            fresh;
+        {ok, Lock} ->
+            Files = rp_util:definition_files(Root, RebarLock),
+            Unchanged = maps:get(<<"definitionHash">>, Lock) =:= rp_util:definition_hash(P, Files),
+            SameProfiles =
+                maps:get(<<"profiles">>, Lock) =:= [list_to_binary(Profile) || Profile <- Profiles],
+            case Upgrade =:= none andalso Unchanged andalso SameProfiles of
+                true ->
+                    rp_check:current(P),
+                    replay;
+                false ->
+                    fresh
+            end
+    end.
 
 rebar3(Args, Project, Env) ->
     Line = lists:flatten(lists:join(" ", Args)),

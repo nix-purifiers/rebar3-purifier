@@ -56,11 +56,17 @@ of rebar3. A project without a lockfile resolves the usual way.
 
 The commands:
 
-- `rebar3-purifier lock` runs rebar3 in a copy of the project with empty
-  caches and the network, on the `default`, `test` and `prod` profiles
+- `rebar3-purifier lock` runs rebar3 in a copy of the project on the
+  `default`, `test` and `prod` profiles
   (`--profile <name>` adds one), and records what rebar3 downloaded and
   what the build produces. It keeps the resolution of `rebar.lock`. A
-  relock of an unchanged project writes the same bytes.
+  relock of unchanged definitions and profiles replays the recorded cache and
+  package index, including plugin versions, and writes the same bytes. A
+  missing recorded download fails instead of resolving a newer version.
+  A first capture, changed definitions, or additional profiles resolve afresh
+  with empty caches and the network.
+  An existing malformed or checksum-invalid lock is an error; restore it or
+  remove it explicitly before a fresh capture.
 - `rebar3-purifier update [<package>...]` runs `rebar3 upgrade` on every
   dependency, or on the named ones, and then locks.
 - `rebar3-purifier prefetch` is described under Working offline.

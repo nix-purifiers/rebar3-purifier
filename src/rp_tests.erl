@@ -78,6 +78,73 @@ tmp_dir(Name) ->
     rp_util:ensure_dir(Dir),
     Dir.
 
+%% Native plugin pins live in the purifier lock, not in rebar.lock.
+%% An unchanged relock must replay them, but changes and explicit updates
+%% must reach the native resolver. Invalid existing locks are never a fallback.
+capture_mode_test() ->
+    Dir = tmp_dir("capture-mode"),
+    Native = filename:join(Dir, "rebar.lock"),
+    File = filename:join(Dir, "rebar3-purifier.lock.json"),
+    Config = filename:join(Dir, "rebar.config"),
+    ok = file:write_file(Config, <<"{deps, []}.\n">>),
+    ok = file:write_file(Native, <<"{\"1.2.0\", []}.\n[].\n">>),
+    Project = #{root => Dir, rebar_lock => Native, lock_file => File},
+    Profiles = ["default", "prod", "test"],
+    ?assertEqual(fresh, rp_lock:capture_mode(Project, Profiles, none)),
+    Lock = #{
+        version => rp_util:lock_version(),
+        definitionHash => rp_util:definition_hash(Project, rp_util:definition_files(Dir, Native)),
+        profiles => [list_to_binary(P) || P <- Profiles],
+        hexTarballs => [],
+        git => []
+    },
+    ok = rp_util:write_lock(File, Lock),
+    {ok, Before} = file:read_file(File),
+    ?assertEqual(replay, rp_lock:capture_mode(Project, Profiles, none)),
+    ?assertEqual(fresh, rp_lock:capture_mode(Project, Profiles, all)),
+    ?assertEqual(fresh, rp_lock:capture_mode(Project, Profiles, ["jsx"])),
+    ?assertEqual(fresh, rp_lock:capture_mode(Project, Profiles ++ ["extra"], none)),
+    ok = file:write_file(Config, <<"{deps, []}.\n% changed\n">>),
+    ?assertEqual(fresh, rp_lock:capture_mode(Project, Profiles, none)),
+    ok = file:write_file(Config, <<"{deps, []}.\n">>),
+    ok = file:write_file(Native, <<"{\"1.2.0\", []}.\n[].\n% changed\n">>),
+    ?assertEqual(fresh, rp_lock:capture_mode(Project, Profiles, none)),
+    ok = file:write_file(Native, <<"{\"1.2.0\", []}.\n[].\n">>),
+    ?assertEqual({ok, Before}, file:read_file(File)),
+    ok = file:write_file(File, <<"not json">>),
+    ?assertThrow({fail, _}, rp_lock:capture_mode(Project, Profiles, none)),
+    ?assertThrow({fail, _}, rp_lock:capture_mode(Project, Profiles, all)),
+    ok = rp_util:write_lock(File, Lock),
+    {ok, Valid} = rp_util:read_lock(File),
+    ok = rp_util:write_json(File, Valid#{<<"profiles">> => []}),
+    ?assertThrow({fail, _}, rp_lock:capture_mode(Project, Profiles, none)),
+    rp_util:rm_rf(Dir).
+
+capture_environment_test() ->
+    Saved = os:getenv("GIT_CONFIG_COUNT"),
+    try
+        os:putenv("GIT_CONFIG_COUNT", "2"),
+        Env = rp_wrapper:environment("/locked/tree", "/owned/cache", [
+            #{<<"url">> => <<"https://example.org/plugin.git">>, <<"path">> => <<"git/recorded">>}
+        ]),
+        ?assertEqual("/owned/cache", proplists:get_value("REBAR_CACHE_DIR", Env)),
+        ?assertEqual("http://127.0.0.1:9", proplists:get_value("HEX_CDN", Env)),
+        ?assertEqual("4", proplists:get_value("GIT_CONFIG_COUNT", Env)),
+        ?assertEqual("safe.directory", proplists:get_value("GIT_CONFIG_KEY_2", Env)),
+        ?assertEqual(
+            "url./locked/tree/git/recorded.insteadOf", proplists:get_value("GIT_CONFIG_KEY_3", Env)
+        ),
+        ?assertEqual(
+            "https://example.org/plugin.git", proplists:get_value("GIT_CONFIG_VALUE_3", Env)
+        ),
+        ?assertEqual("2", os:getenv("GIT_CONFIG_COUNT"))
+    after
+        case Saved of
+            false -> os:unsetenv("GIT_CONFIG_COUNT");
+            _ -> os:putenv("GIT_CONFIG_COUNT", Saved)
+        end
+    end.
+
 %% A Hex tarball in the cache is a file entry at its cache path, at the
 %% tarball URL of its repository, with its SHA-256.
 hex_entries_test() ->
