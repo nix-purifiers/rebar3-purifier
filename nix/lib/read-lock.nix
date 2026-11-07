@@ -63,9 +63,10 @@ let
 
   name = toString lockFile;
   fix = "run `rebar3-purifier lock` and commit the lockfile";
+  recover = "restore a valid lockfile or move this file aside before running `rebar3-purifier lock`";
 
   exists = builtins.pathExists lockFile;
-  lock = builtins.addErrorContext "while reading the rebar3-purifier lockfile ${name}; if it is not valid JSON, restore it from version control or run `rebar3-purifier lock`" (
+  lock = builtins.addErrorContext "while reading the rebar3-purifier lockfile ${name}; if it is not valid JSON, ${recover}" (
     builtins.fromJSON (builtins.readFile lockFile)
   );
   supportedVersion = import ./lock-version.nix;
@@ -215,11 +216,11 @@ let
     if !exists then
       "rebar3-purifier: ${name} does not exist; run `rebar3-purifier lock`"
     else if !(builtins.isAttrs lock && lock ? version) then
-      "rebar3-purifier: ${name} is not a rebar3-purifier lockfile; ${fix}"
+      "rebar3-purifier: ${name} is not a rebar3-purifier lockfile; ${recover}"
     else if lock.version != supportedVersion then
-      "rebar3-purifier: ${name} has lock format version ${builtins.toJSON lock.version}, and this library reads version ${toString supportedVersion}; ${fix}"
+      "rebar3-purifier: ${name} has lock format version ${builtins.toJSON lock.version}, and this library reads version ${toString supportedVersion}; ${recover}"
     else if lock.contentHash or null != import ./content-hash.nix lock then
-      "rebar3-purifier: ${name} does not match its contentHash, so it was changed after `rebar3-purifier lock` wrote it; ${fix}"
+      "rebar3-purifier: ${name} does not match its contentHash, so it was changed after `rebar3-purifier lock` wrote it; ${recover}"
     else
       null;
 

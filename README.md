@@ -65,8 +65,8 @@ The commands:
   missing recorded download fails instead of resolving a newer version.
   A first capture, changed definitions, or additional profiles resolve afresh
   with empty caches and the network.
-  An existing malformed or checksum-invalid lock is an error; restore it or
-  remove it explicitly before a fresh capture.
+  An existing malformed or checksum-invalid lock is an error; restore a valid
+  lockfile or move the invalid file aside before a fresh capture.
 - `rebar3-purifier update [<package>...]` runs `rebar3 upgrade` on every
   dependency, or on the named ones, and then locks.
 - `rebar3-purifier prefetch` is described under Working offline.
@@ -223,9 +223,9 @@ evaluation.
 | Problem | Message names |
 | --- | --- |
 | The lockfile does not exist | `rebar3-purifier lock` |
-| The lockfile is not valid JSON, or not a rebar3-purifier lockfile | `rebar3-purifier lock` |
-| The lockfile has another format version | `rebar3-purifier lock` |
-| The lockfile was changed after `lock` wrote it (its `contentHash` differs) | `rebar3-purifier lock` |
+| The lockfile is not valid JSON, or not a rebar3-purifier lockfile | restore a valid lockfile, or move the invalid file aside before `rebar3-purifier lock` |
+| The lockfile has another format version | restore a valid lockfile, or move the invalid file aside before `rebar3-purifier lock` |
+| The lockfile was changed after `lock` wrote it (its `contentHash` differs) | restore a valid lockfile, or move the invalid file aside before `rebar3-purifier lock` |
 | `rebar.config`, `rebar.lock` or the `rebar.config` of an application changed since the lock | `rebar3-purifier lock` |
 | `rebar.lock` names a dependency that has no download | `rebar3-purifier lock` |
 | A download has another hash than the lockfile records | the build fails in the fetcher, which names the hash |

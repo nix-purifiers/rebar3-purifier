@@ -154,8 +154,8 @@ read_lock(File) ->
                 catch
                     error:_ ->
                         fail(
-                            "~ts is not valid JSON; restore it from version control or run "
-                            "`rebar3-purifier lock`",
+                            "~ts is not valid JSON; restore a valid lockfile or move this "
+                            "file aside before running `rebar3-purifier lock`",
                             [File]
                         )
                 end,
@@ -164,20 +164,23 @@ read_lock(File) ->
                     maps:get(<<"contentHash">>, Lock, none) =:= content_hash(Lock) orelse
                         fail(
                             "~ts does not match its contentHash, so it was changed after "
-                            "`rebar3-purifier lock` wrote it; run `rebar3-purifier lock` and "
-                            "commit the lockfile",
+                            "`rebar3-purifier lock` wrote it; restore a valid lockfile or move "
+                            "this file aside before running `rebar3-purifier lock`",
                             [File]
                         ),
                     {ok, Lock};
                 #{<<"version">> := Other} ->
                     fail(
                         "~ts has lock format version ~p, and this rebar3-purifier reads "
-                        "version ~b; run `rebar3-purifier lock` and commit the lockfile",
+                        "version ~b; restore a valid lockfile or move this file aside "
+                        "before running `rebar3-purifier lock`",
                         [File, Other, Current]
                     );
                 _ ->
                     fail(
-                        "~ts is not a rebar3-purifier lockfile; run `rebar3-purifier lock`", [
+                        "~ts is not a rebar3-purifier lockfile; restore a valid lockfile "
+                        "or move this file aside before running `rebar3-purifier lock`",
+                        [
                             File
                         ]
                     )
