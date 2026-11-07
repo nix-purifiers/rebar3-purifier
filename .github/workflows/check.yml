@@ -66,15 +66,24 @@ jobs:
         run: nix build .#toolchain --out-link toolchain
       - name: Lock a copy of hello with both lockfiles outside it
         run: |
+          # Unversioned plugins can resolve newer releases than the seeded
+          # fixture. Compare two independent fresh captures; the following
+          # seeded relock and offline jobs still check historical locks.
           mkdir -p "$RUNNER_TEMP/external/locks"
+          cp -r tests/fixtures/hello "$RUNNER_TEMP/ordinary"
           cp -r tests/fixtures/hello "$RUNNER_TEMP/external/project"
+          rm "$RUNNER_TEMP/ordinary/rebar3-purifier.lock.json"
           rm "$RUNNER_TEMP/external/project/rebar3-purifier.lock.json"
+          (cd "$RUNNER_TEMP/ordinary" &&
+            "$GITHUB_WORKSPACE/toolchain/bin/rebar3-purifier" lock)
           (cd "$RUNNER_TEMP/external/project" &&
             "$GITHUB_WORKSPACE/toolchain/bin/rebar3-purifier" lock \
               --lockfile ../locks/rebar3-purifier.lock.json \
               --tool-lockfile ../locks/rebar.lock)
-          cmp "$RUNNER_TEMP/external/locks/rebar3-purifier.lock.json" tests/fixtures/hello/rebar3-purifier.lock.json
-          cmp "$RUNNER_TEMP/external/locks/rebar.lock" tests/fixtures/hello/rebar.lock
+          cmp "$RUNNER_TEMP/external/locks/rebar3-purifier.lock.json" "$RUNNER_TEMP/ordinary/rebar3-purifier.lock.json"
+          cmp "$RUNNER_TEMP/external/locks/rebar.lock" "$RUNNER_TEMP/ordinary/rebar.lock"
+          cmp "$RUNNER_TEMP/ordinary/rebar.lock" tests/fixtures/hello/rebar.lock
+          cmp "$RUNNER_TEMP/external/project/rebar.lock" tests/fixtures/hello/rebar.lock
       - name: Lock the fixtures again
         run: |
           for fixture in hello umbrella outdated; do
