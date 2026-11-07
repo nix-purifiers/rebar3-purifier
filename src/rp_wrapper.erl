@@ -20,7 +20,7 @@
 %% the same root.
 -module(rp_wrapper).
 
--export([env/0, prefetch/1, quote/1]).
+-export([env/0, prefetch/1, quote/1, capture_env/2, environment/3]).
 
 env() ->
     case os:getenv("REBAR3_PURIFIER") of
@@ -70,6 +70,15 @@ prepare(#{root := Root} = Project) ->
     Cache = filename:join([Root, "_build", "rebar3-purifier", "cache"]),
     mirror(Tree, Cache),
     {Tree, Cache}.
+
+%% Capture still runs native rebar3 in a clean project and writable cache.
+%% Reuse exactly the same recorded index and git mapping as offline replay.
+%% A materialization failure propagates; it must not resolve newer downloads.
+capture_env(Project, Cache) ->
+    Tree = realize(Project),
+    mirror(Tree, Cache),
+    {ok, Sources} = file:read_file(filename:join(Tree, "git-sources.json")),
+    environment(Tree, Cache, json:decode(Sources)).
 
 %% Builds the cache tree of the lockfile through Nix, with one GC root
 %% under _build/rebar3-purifier, and returns its store path.
@@ -161,6 +170,10 @@ mirror(Tree, Cache) ->
     end.
 
 print(Tree, Cache, GitSources) ->
+    io:put_chars([export(Name, Value) || {Name, Value} <- environment(Tree, Cache, GitSources)]),
+    ok.
+
+environment(Tree, Cache, GitSources) ->
     Count =
         case os:getenv("GIT_CONFIG_COUNT") of
             false -> 0;
@@ -175,23 +188,20 @@ print(Tree, Cache, GitSources) ->
                 }
              || #{<<"url">> := U, <<"path">> := P} <- GitSources
             ],
-    Lines =
-        [
-            export("REBAR_CACHE_DIR", Cache),
-            %% Port 9 (discard) refuses connections, so Hex's default
-            %% repository fails at once and rebar3 takes the cached tarball.
-            export("HEX_CDN", "http://127.0.0.1:9"),
-            export("GIT_CONFIG_COUNT", integer_to_list(Count + length(GitConfig)))
-        ] ++
-            lists:append([
-                [
-                    export("GIT_CONFIG_KEY_" ++ integer_to_list(Count + I - 1), K),
-                    export("GIT_CONFIG_VALUE_" ++ integer_to_list(Count + I - 1), V)
-                ]
-             || {I, {K, V}} <- lists:enumerate(GitConfig)
-            ]),
-    io:put_chars(Lines),
-    ok.
+    [
+        {"REBAR_CACHE_DIR", Cache},
+        %% Port 9 (discard) refuses connections, so Hex's default
+        %% repository fails at once and rebar3 takes the cached tarball.
+        {"HEX_CDN", "http://127.0.0.1:9"},
+        {"GIT_CONFIG_COUNT", integer_to_list(Count + length(GitConfig))}
+    ] ++
+        lists:append([
+            [
+                {"GIT_CONFIG_KEY_" ++ integer_to_list(Count + I - 1), K},
+                {"GIT_CONFIG_VALUE_" ++ integer_to_list(Count + I - 1), V}
+            ]
+         || {I, {K, V}} <- lists:enumerate(GitConfig)
+        ]).
 
 export(Name, Value) ->
     ["export ", Name, "=", quote(Value), "\n"].
