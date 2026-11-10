@@ -38,6 +38,12 @@ jobs:
       - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
       - name: Build the checks
         run: nix flake check --print-build-logs
+      - name: Fresh compiled OTP application capture
+        run: python3 tests/otp-capture.py
+      - name: Compiled OTP SDK and payload controls
+        run: python3 tests/otp-controls.py
+      - name: Direct compiled OTP producer and consumer rebuilds
+        run: python3 tests/otp-rebuild.py
 
   scripts:
     strategy:

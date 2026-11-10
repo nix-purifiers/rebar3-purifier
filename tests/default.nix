@@ -28,6 +28,10 @@ let
   umbrella = buildRebar3Project {
     src = ./fixtures/umbrella;
   };
+  projectedUmbrella = buildRebar3Project {
+    src = ./fixtures/umbrella;
+    otpApplications.umbrella = [ "greeter" ];
+  };
 
   # The hello fixture as a build kept external: its tree holds rebar.lock
   # and no rebar3-purifier lockfile, which lies outside it. `without` is
@@ -131,6 +135,8 @@ let
       }).problems;
 in
 {
+  fixture-otp-applications = projectedUmbrella.packages.otp-umbrella;
+  fixture-otp-consumers = import ./otp-projections.nix { pkgs = extended; };
   fixture-hello-escript =
     prints "fixture-hello-escript" "${lib.getExe hello.packages.escript-hello} Nix"
       ''{"hello":"Nix"}'';

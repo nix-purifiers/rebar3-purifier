@@ -1,0 +1,79 @@
+{
+  "contentHash": "sha256-HHkETNGbNbgsaN68ljo2TB//noSi9BEWLDmXIhGKcWY=",
+  "definitionFiles": [
+    "rebar.config",
+    "rebar.lock"
+  ],
+  "definitionHash": "sha256-5mNUrO0aQcCnzWo6yg670Zk+X2VwdNoGjMARpKZtZXg=",
+  "git": [
+    {
+      "commitObject": {
+        "gitlinks": [],
+        "object": "dHJlZSA5MTBjMjMwMmUwMjViOGViNTExZmJhYzRhNDU3MDU5ZGJlYjlkMmVlCnBhcmVudCA4M2FhNmMwYmU4YzY0MmQ1NjY1NTM3ODA5ZjJjZWNiMWMyNzRmNjNjCmF1dGhvciBUcmlzdGFuIFNsb3VnaHRlciA8dHJpc3RhbkBzbG91Z2h0ZXIuZGV2PiAxNzE2Mjg5OTU4IC0wNjAwCmNvbW1pdHRlciBUcmlzdGFuIFNsb3VnaHRlciA8dHJpc3RhbkBzbG91Z2h0ZXIuZGV2PiAxNzE2Mjg5OTU4IC0wNjAwCmdwZ3NpZyAtLS0tLUJFR0lOIFBHUCBTSUdOQVRVUkUtLS0tLQogCiBpSFVFQUJZS0FCMFdJUVNlUlc2OVI0N2NYdVFCcmdiS0dnVlRmUTdEYlFVQ1preUJwZ0FLQ1JES0dnVlRmUTdECiBiVEtkQVA5L0IvUVpoS3p2aWQ0MzBkc21EOUlmQTU4OWNGUkd4UldCUW9BTzJCV2oyZ0VBN0YvVDI0Tm5QQ0tICiA4TkN1d1A0bnVubzBncXluaTRKS3ZqSjFiWFNhdmdNPQogPWpVTmoKIC0tLS0tRU5EIFBHUCBTSUdOQVRVUkUtLS0tLQoKYnVtcCB0byAxLjE1LjAK"
+      },
+      "hash": "sha256-qmYSy+//L57jTVHcRYQ6cvuRtJZ5mbLc987UtLiLkzY=",
+      "rev": "935c20744b6f0adf8e6ea92e3da939aae2064b0f",
+      "sources": [
+        {
+          "branches": [],
+          "tags": [
+            "v1.15.0"
+          ],
+          "url": "https://github.com/blt/port_compiler.git"
+        }
+      ],
+      "url": "https://github.com/blt/port_compiler.git"
+    },
+    {
+      "commitObject": {
+        "gitlinks": [
+          {
+            "path": "apps/opentelemetry_exporter/opentelemetry-proto",
+            "rev": "4ca4f0335c63cda7ab31ea7ed70d6553aee14dce"
+          }
+        ],
+        "object": "dHJlZSA4YzgzOGQ3YTIzYjcxYjM2NGExOWVjMTBkZDE2ZDJiNmU1MzU1Zjc1CnBhcmVudCBhYWEzNTJhNTJhYmIzNWM2M2M2NjNiMWY1ZDE3NTdiOGQ5YzBmNDNhCmF1dGhvciBUcmlzdGFuIFNsb3VnaHRlciA8dEBjcmFzaGZhc3QuY29tPiAxNzYwNzMzNjQ0IC0wNDAwCmNvbW1pdHRlciBHaXRIdWIgPG5vcmVwbHlAZ2l0aHViLmNvbT4gMTc2MDczMzY0NCAtMDYwMApncGdzaWcgLS0tLS1CRUdJTiBQR1AgU0lHTkFUVVJFLS0tLS0KIAogd3NGY0JBQUJDQUFRQlFKbzhxbk1DUkMxYVE3dXU1VWhsQUFBVGtjUUFCcG4rOXVKVmRIVDFZQ3RyeFAxdXJ2SAogWUpKeHpIVzY2TDZaYWZvd3JzUjNLNHpTNjdNejdwT2VNa29JQjFXd28zN216dWI1RkVLUGNaVE1iQUtBTEUxdwogMGJobyt5OFQ5bUhzd2pyRXI3RS9pQnpUaWlpbXd6TG1yeVdZR2E3OE1BSllhWm9McDhONFgxN05jcW5JSytPMgogN0orY2tHSzY4TmozcUxDL29oYXFoWnYrZUQ3SkhHMWY5ZEVEVTFoeCtOc0RFNjJTcmlJNzQvanNSbFF2bHU2bQogMzdlYWVDMjVPYTV1Z2d5bVhQK0pvd2FsUForL0tyYXY1WWQ4QUgyZFN4V3B2ajM1RGpTbEx2QmlZT2ZRR1QyVwogQVZQSy84ZGdXc0E3ZUpkK1c3S0dWMlJpQisweCs4WEoyRlZFWUlScklVbmE3MTJocEJIaW1tZjZyTnNVSXUxYQogazArV1pwUExKN3pYYVpsdnlJSVpnVXFGMjF2QXg0Q0FENHdTTlhreEU5MzRicE5Ca3h1d0xQR3BwcjVzOCtpbQogS3RJY3lGTWYxSTFYRE9NTGZNUDB0cC9VME9DZ2xBRkhpRmFGSmZ6cCsrNUdJd3BQT0hnQjMwUHZCbHNpMGFwawogcTdsaFVreG5RenZlOS9qN1BnNlNwakhiOUlNRWRvYjgrMDFLWlIrMjZPbzJoTHczTS9lOW1SNmhZSGRqSUw4bAogSmJvRk1hK0NoK24zN0l4dVhvam45Mmt0ZFl3M2I4NGZNZGRVT3lxdlNoU3F6YTJTT2h1QTFmOFR2UVJPTjdvWQogRWMwYTJTNFhFTVc3bVJBOXYwUCsyb3lOSGdla3ByZGlWZnVUa2JtNlBGVUpzM21IV2ZIdHFoOHBCdGZWcktvNQogc01tVFJONlhkU21KVnZPZEdidUEKID13Z0RwCiAtLS0tLUVORCBQR1AgU0lHTkFUVVJFLS0tLS0KIAoKc2ltcGxpZnkgY2xpZmYudG9tbCB1c2FnZSBhbmQgYnVtcCB2ZXJzaW9ucyAoIzkyMykKCiogY2hvcmU6IGlnbm9yZSBjaG9yZSBjb21taXRzIGluIGNoYW5nZWxvZyBnZW5lcmF0aW9uCgoqIGNob3JlOiBzdG9yZSBjbGlmZiBjb25maWdzIGluIG9uZSBmaWxlCgoqIGZpeDogbm9fYXV0b19pbXBvcnQgb2YgbGluayB0byBmaXggb3RwLTI4IHdhcm5pbmcKCiogY2hvcmU6IGJ1bXAgdG8gb3BlbnRlbGVtZXRyeS0xLjcuMCwgYXBpLTEuNS4wIGV4cG9ydGVyLTEuMTAuMAoKKiBjaG9yZTogbWFrZSB0YWcgcHJlZml4IHByb3Blcmx5IGJlIDxhcHA+L3Y8dnNuPgoKKiBjaG9yZTogdXBkYXRlIGNoYW5nZWxvZ3MgZm9yIGxhdGVzdCByZWxlYXNlcw=="
+      },
+      "hash": "sha256-aExL3XmDMHF2ftTHmkmVCJJ8A3slkG8hv/uPcZlL6hI=",
+      "rev": "9f0511e705f18e4b3cc1767b42367ba49e02455a",
+      "sources": []
+    },
+    {
+      "commitObject": {
+        "gitlinks": [],
+        "object": "dHJlZSAxMWU5MWNhOGY0ZDI1YzY0YjNlZDU1ZDJiZDcwOWFlYjBkNWY1MWE2CnBhcmVudCA5NzQ1NWZjNjNiNzgwZmY4NzMyYTQ4MDdiNTMxNDdhNTBmZjMxNzAzCmF1dGhvciBGcmVkIEhlYmVydCA8bW9ub25jcWNAZmVyZC5jYT4gMTcyNTEzMTQ2NCArMDAwMApjb21taXR0ZXIgRnJlZCBIZWJlcnQgPG1vbm9uY3FjQGZlcmQuY2E+IDE3MjUxMzE4MDEgKzAwMDAKCkJ1bXAgdG8gMi41LjYKCkFsc28gbm9ybWFsaXplIHRoZSBsaWNlbnNlJ3MgbGFuZ3VhZ2UgdG8gdGhlIHN0YW5kYXJkIEJTRC0zLUNsYXVzZSBhcwpwZXIgaHR0cHM6Ly9zcGR4Lm9yZy9saWNlbnNlcy9CU0QtMy1DbGF1c2UuaHRtbCwgd2hpY2ggaXMgdGhlIGxpY2Vuc2UKdGhhdCB3YXMgYWxyZWFkeSBiZWluZyB1c2VkLCBidXQgYXBwYXJlbnRseSBoYWQgc29tZSB3b3JkaW5nCmRpZmZlcmVuY2VzLgo="
+      },
+      "hash": "sha256-0IjutePzOWR92HGeOV2s+NioWVC4nLbEGYJAccKQwKg=",
+      "rev": "c2a76855be3a226a3148c0dfc21ce000b6186ef8",
+      "sources": []
+    }
+  ],
+  "hexTarballs": [],
+  "otpRelease": "28",
+  "outputs": {
+    "apps": [
+      {
+        "dir": "apps/greeter",
+        "name": "greeter",
+        "version": "1.0.0"
+      },
+      {
+        "dir": "apps/server",
+        "name": "server",
+        "version": "1.0.0"
+      }
+    ],
+    "escripts": [],
+    "hexPackages": [],
+    "releases": [
+      "umbrella"
+    ]
+  },
+  "profiles": [
+    "default",
+    "prod",
+    "test"
+  ],
+  "rebar3Version": "3.28.0",
+  "version": 2
+}

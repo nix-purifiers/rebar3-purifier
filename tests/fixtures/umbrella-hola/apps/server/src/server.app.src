@@ -1,0 +1,9 @@
+{application, server, [
+    {description, "The server of the rebar3-purifier umbrella fixture"},
+    {vsn, "1.0.0"},
+    {registered, []},
+    {mod, {server_app, []}},
+    {applications, [kernel, stdlib, greeter]},
+    {env, []},
+    {modules, []}
+]}.

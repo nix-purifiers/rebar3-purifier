@@ -1,0 +1,9 @@
+[{<<"opentelemetry_api">>,
+  {git_subdir,"https://github.com/open-telemetry/opentelemetry-erlang.git",
+              {ref,"9f0511e705f18e4b3cc1767b42367ba49e02455a"},
+              "apps/opentelemetry_api"},
+  0},
+ {<<"recon">>,
+  {git,"https://github.com/ferd/recon.git",
+       {ref,"c2a76855be3a226a3148c0dfc21ce000b6186ef8"}},
+  0}].
