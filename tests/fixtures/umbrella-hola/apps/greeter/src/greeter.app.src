@@ -1,0 +1,8 @@
+{application, greeter, [
+    {description, "Greetings, for the rebar3-purifier umbrella fixture"},
+    {vsn, "1.0.0"},
+    {registered, []},
+    {applications, [kernel, stdlib, recon, opentelemetry_api]},
+    {env, []},
+    {modules, []}
+]}.

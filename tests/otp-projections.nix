@@ -10,15 +10,7 @@ let
       inherit src;
       otpApplications.umbrella = [ "greeter" ];
     };
-  secondSource =
-    if src2 != null then
-      src2
-    else
-      pkgs.runCommand "umbrella-genuine-hola-source" { } ''
-        cp -r ${src1} "$out"
-        chmod -R u+w "$out"
-        substituteInPlace "$out/apps/greeter/src/greeter.erl" --replace-fail 'Hello, ~s' 'Hola, ~s'
-      '';
+  secondSource = if src2 != null then src2 else ./fixtures/umbrella-hola;
   first = build src1;
   second = build secondSource;
   erlang = first.projections.umbrella.otp.runtime;
