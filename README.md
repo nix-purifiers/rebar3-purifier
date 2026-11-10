@@ -334,6 +334,44 @@ an escript, or `packages.app-<name>` for an application, and the `tests`
 attribute of the builder is the test run that goes into the `checks` of a
 flake.
 
+## Compiled OTP applications across consumers
+
+Select project application roots from an existing locked relx release:
+
+```nix
+project = pkgs.rebar3-purifier.buildRebar3Project {
+  src = ./.;
+  otpApplications.umbrella = [ "greeter" ];
+};
+```
+
+`project.packages.otp-umbrella` contains compiled non-SDK applications and
+`catalog.json`. `project.projections.umbrella` exposes `otp`, `resources`,
+`web`, and `java-resources`. The `otp` value provides `applicationRoot`
+(for `ERL_LIBS`), `runtime` (the matching Erlang SDK), and `catalog`.
+The web tree and Java resource JAR carry the same application files;
+extract them before running them with Erlang or Elixir.
+
+The native release descriptor determines the application closure. Application
+versions, module ownership, dependency declarations, and compiled bytes are
+checked against that release. SDK applications stay in the original runtime.
+Native relx stripping may remove debug chunks, so SDK validation compares
+native code MD5 and all nondebug BEAM chunks, recording both original and
+release byte hashes. It does not assert raw SDK BEAM byte equality.
+
+This projection requires native Linux, OTP 27 or later, and matching OTP and
+ERTS versions. Duplicate module owners, SDK module shadows, and non-SDK native
+binaries or NIF payloads are rejected. Such payloads need separate runtime
+proof before they can be supported. Existing packages and defaults remain
+available without selecting `otpApplications`.
+
+Checks start applications and call their dependencies in fresh Erlang and
+Elixir VMs, verify every selected module's loaded bytes and origin, and read
+Java resources through an isolated class loader. Two genuinely compiled
+producer revisions exercise native, HTTP-served, and JAR-carried files.
+Missing dependencies, replacement modules, incompatible SDKs, duplicate
+owners, and actual native payloads have separate negative controls.
+
 ## Credits
 
 The purifier idea was inspired by nixcloud's

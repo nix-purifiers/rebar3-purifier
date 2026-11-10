@@ -52,6 +52,7 @@
   hostname,
   # The rebar3-purifier command, from the rebar3-purifier scope.
   cli,
+  callPackage,
   # The shared purifier library (`lib.purifier` of its flake).
   purifier,
 }:
@@ -84,6 +85,7 @@ in
   # builtins.path. The default leaves out _build, VCS and editor state, and
   # result links.
   srcFilter ? null,
+  otpApplications ? { },
 }:
 let
   readLock = import ./read-lock.nix { inherit lib; };
@@ -311,7 +313,32 @@ let
   byName =
     prefix: list: f:
     lib.listToAttrs (map (x: lib.nameValuePair "${prefix}-${x.name or x}" (f x)) list);
+  otp = lib.mapAttrs (
+    release: roots:
+    callPackage ./otp-projections.nix
+      {
+        inherit
+          lib
+          stdenv
+          runCommand
+          python3
+          writeText
+          purifier
+          ;
+      }
+      {
+        producer = all;
+        inherit release roots erlang;
+        ownApplications = map (app: app.name) outputs.apps;
+        otpRelease = lock.otpRelease;
+      }
+  ) otpApplications;
 in
+assert lib.assertMsg (
+  builtins.isAttrs otpApplications
+  && builtins.all (name: builtins.elem name outputs.releases) (builtins.attrNames otpApplications)
+) "rebar3-purifier: otpApplications must name locked relx releases";
+assert builtins.all (value: value.validated) (builtins.attrValues otp);
 {
   inherit tests cache;
 
@@ -330,7 +357,9 @@ in
   )
   // byName "escript" outputs.escripts (
     e: link e { "bin/${e}" = "bin/${e}"; } { meta.mainProgram = e; }
-  );
+  )
+  // lib.mapAttrs' (name: value: lib.nameValuePair "otp-${name}" value.package) otp;
+  projections = lib.mapAttrs (_: value: value.projections) otp;
 
   release =
     if outputs.hexPackages == [ ] then
