@@ -134,9 +134,11 @@ let
         lockFile = lockFileOf (withContentHash (helloLock // { inherit version; }));
       }).problems;
 in
-{
+lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
   fixture-otp-applications = projectedUmbrella.packages.otp-umbrella;
   fixture-otp-consumers = import ./otp-projections.nix { pkgs = extended; };
+}
+// {
   fixture-hello-escript =
     prints "fixture-hello-escript" "${lib.getExe hello.packages.escript-hello} Nix"
       ''{"hello":"Nix"}'';
