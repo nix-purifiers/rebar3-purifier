@@ -23,7 +23,7 @@ let
   pkgs = import nixpkgs { };
   inherit (pkgs) lib;
   purifier = import (builtins.storePath purifierSrc + "/nix/lib") { inherit lib; };
-  readLock = import ./read-lock.nix { inherit lib; };
+  readLock = import ../../lib-overlays/default/read-lock.nix { inherit lib; };
   match = builtins.match "(${builtins.storeDir}/[^/]+)/bin/rebar3-purifier" cli;
 in
 assert match != null || throw "rebar3-purifier: the command ${cli} is not in the Nix store";

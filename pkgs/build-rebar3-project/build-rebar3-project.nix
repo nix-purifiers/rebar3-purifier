@@ -88,7 +88,7 @@ in
   otpApplications ? { },
 }:
 let
-  readLock = import ./read-lock.nix { inherit lib; };
+  readLock = import ../../lib-overlays/default/read-lock.nix { inherit lib; };
   # The lock in memory, which checkLock of the purifier library stops at
   # its problems, each naming the command that fixes it.
   lock = purifier.checkLock (readLock {

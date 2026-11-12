@@ -73,7 +73,8 @@ let
   helloLockFile = ./fixtures/hello/rebar3-purifier.lock.json;
   helloLock = builtins.fromJSON (builtins.readFile helloLockFile);
   umbrellaLock = builtins.fromJSON (builtins.readFile ./fixtures/umbrella/rebar3-purifier.lock.json);
-  withContentHash = lock: lock // { contentHash = import ../nix/lib/content-hash.nix lock; };
+  withContentHash =
+    lock: lock // { contentHash = import ../lib-overlays/default/content-hash.nix lock; };
   lockFileOf = lock: builtins.toFile "rebar3-purifier.lock.json" (builtins.toJSON lock);
   pathsOf = entries: map (e: e.path) entries;
 
@@ -95,7 +96,7 @@ let
       expr = extended.writeText "refused-expression.nix" ''
         let
           nixpkgs = import ${pkgs.path} { system = "${pkgs.stdenv.hostPlatform.system}"; };
-          build = nixpkgs.callPackage ${../nix/lib}/build-rebar3-project.nix {
+          build = nixpkgs.callPackage ${../.}/pkgs/build-rebar3-project/build-rebar3-project.nix {
             purifier = import ${purifierSrc} { inherit (nixpkgs) lib; };
             cli = null;
           };
@@ -125,7 +126,7 @@ let
       touch $out
     '';
 
-  readLock = import ../nix/lib/read-lock.nix { inherit lib; };
+  readLock = import ../lib-overlays/default/read-lock.nix { inherit lib; };
   readsVersion =
     version:
     !builtins.any (lib.hasInfix "lock format version")
@@ -282,7 +283,7 @@ lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
 
   # readLock reads the version it supports and rejects any other.
   lock-version =
-    assert readsVersion (import ../nix/lib/lock-version.nix);
+    assert readsVersion (import ../lib-overlays/default/lock-version.nix);
     assert !(readsVersion 0);
     runCommand "lock-version" { } "touch $out";
 }

@@ -28,6 +28,13 @@
   purifierSrc ? null,
 }:
 let
+  runtimeSource = lib.fileset.toSource {
+    root = ../..;
+    fileset = lib.fileset.unions [
+      ../../lib-overlays/default
+      ../build-rebar3-project
+    ];
+  };
   inherit (beamPackages) erlang rebar3;
   wrapperArgs = lib.escapeShellArgs [
     "--set"
@@ -38,7 +45,7 @@ let
     "${rebar3}/bin/rebar3"
     "--set"
     "REBAR3_PURIFIER_NIX_LIB"
-    "${../../nix/lib}"
+    "${runtimeSource}/pkgs/build-rebar3-project"
     "--set-default"
     "REBAR3_PURIFIER_NIXPKGS"
     "${path}"
@@ -81,7 +88,7 @@ runCommand "rebar3-purifier-toolchain-${rebar3.version}"
     # purifier library.
     mkdir -p "$out/share/rebar3-purifier"
     ln -s ${path} "$out/share/rebar3-purifier/nixpkgs"
-    ln -s ${../../nix/lib} "$out/share/rebar3-purifier/nix-lib"
+    ln -s ${runtimeSource}/pkgs/build-rebar3-project "$out/share/rebar3-purifier/nix-lib"
     ln -s ${cli} "$out/share/rebar3-purifier/cli"
     ln -s ${purifierSrc} "$out/share/rebar3-purifier/purifier"
   ''

@@ -23,7 +23,7 @@
 
 %% The builder of the cache tree in Nix. The manifest lists one entry per
 %% line, its path in the tree and its store path, separated by a tab. The
-%% entries file holds the download entries that nix/lib/read-lock.nix
+%% entries file holds the download entries that lib-overlays/default/read-lock.nix
 %% reads from the lockfile and rebar.lock, where each git entry carries the
 %% URLs rebar3 clones it from as `rebar3Sources`. A file
 %% entry, and a git entry without `leaveDotGit`, is linked at its path. A

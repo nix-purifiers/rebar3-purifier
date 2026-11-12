@@ -154,7 +154,7 @@ memory that the nix-purifiers share.
 The other arguments are `beamPackages` (the default is the one of the OTP
 release the lock was made with, when nixpkgs has it), `cli`,
 `releaseProfile`, `buildInputs`, `nativeBuildInputs` and `srcFilter`.
-`nix/lib/build-rebar3-project.nix` documents them.
+`pkgs/build-rebar3-project/build-rebar3-project.nix` documents them.
 
 We recommend committing both `rebar3-purifier.lock.json` and `rebar.lock`
 to the repository. The builder and the commands look for them there.
