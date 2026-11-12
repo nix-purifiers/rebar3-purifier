@@ -140,6 +140,23 @@ lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
   fixture-otp-consumers = import ./otp-projections.nix { pkgs = extended; };
 }
 // {
+  installed-library = runCommand "rebar3-installed-library" { nativeBuildInputs = [ pkgs.nix ]; } ''
+    export HOME="$TMPDIR" NIX_STATE_DIR="$TMPDIR/state" NIX_LOG_DIR="$TMPDIR/log"
+    nix-instantiate --eval --strict --store dummy:// --expr '
+      let
+        lib = import ${pkgs.path}/lib;
+        lock = (import ${extended.rebar3-purifier.toolchain}/share/rebar3-purifier/nix-lib/read-lock.nix { inherit lib; }) {
+          src = ${./fixtures/hello};
+        };
+        builder = import ${extended.rebar3-purifier.toolchain}/share/rebar3-purifier/nix-lib/build-rebar3-project.nix;
+      in assert lock.problems == [ ];
+         assert (builtins.functionArgs builder) ? purifier;
+         true
+    ' > result
+    grep -qx true result
+    touch "$out"
+  '';
+
   fixture-hello-escript =
     prints "fixture-hello-escript" "${lib.getExe hello.packages.escript-hello} Nix"
       ''{"hello":"Nix"}'';
