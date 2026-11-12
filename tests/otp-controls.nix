@@ -6,7 +6,7 @@ let
   roots = [ "greeter" ];
   selection =
     producer: runtime:
-    pkgs.rebar3-purifier.callPackage ../nix/lib/otp-projections.nix { } {
+    pkgs.rebar3-purifier.callPackage ../pkgs/build-rebar3-project/otp-projections.nix { } {
       inherit producer roots;
       release = "umbrella";
       ownApplications = [

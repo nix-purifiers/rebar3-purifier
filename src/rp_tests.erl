@@ -191,7 +191,7 @@ missing_test() ->
 
 %% The contentHash is the SHA-256 of the lockfile without it, in the JSON
 %% that builtins.toJSON of Nix writes. The expected value is what
-%% nix/lib/content-hash.nix gives for the same lockfile.
+%% lib-overlays/default/content-hash.nix gives for the same lockfile.
 content_hash_test() ->
     Lock = #{
         <<"version">> => 2,

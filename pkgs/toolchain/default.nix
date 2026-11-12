@@ -28,6 +28,13 @@
   purifierSrc ? null,
 }:
 let
+  runtimeSource = lib.fileset.toSource {
+    root = ../..;
+    fileset = lib.fileset.unions [
+      ../../lib-overlays/default
+      ../build-rebar3-project
+    ];
+  };
   inherit (beamPackages) erlang rebar3;
   wrapperArgs = lib.escapeShellArgs [
     "--set"
@@ -38,7 +45,7 @@ let
     "${rebar3}/bin/rebar3"
     "--set"
     "REBAR3_PURIFIER_NIX_LIB"
-    "${../../nix/lib}"
+    "${runtimeSource}/pkgs/build-rebar3-project"
     "--set-default"
     "REBAR3_PURIFIER_NIXPKGS"
     "${path}"
@@ -79,9 +86,19 @@ runCommand "rebar3-purifier-toolchain-${rebar3.version}"
     # What the wrapper builds with, for scripts that build a project the
     # same way: the nixpkgs, the Nix library, the command and the shared
     # purifier library.
-    mkdir -p "$out/share/rebar3-purifier"
+    mkdir -p "$out/share/rebar3-purifier/nix-lib"
     ln -s ${path} "$out/share/rebar3-purifier/nixpkgs"
-    ln -s ${../../nix/lib} "$out/share/rebar3-purifier/nix-lib"
+    # Keep the installed entrypoints usable through this public alias. Nix
+    # resolves relative imports from the alias's location, so each entrypoint
+    # imports the canonical source path rather than exposing a directory link.
+    cat > "$out/share/rebar3-purifier/nix-lib/read-lock.nix" <<EOF
+    import ${runtimeSource}/lib-overlays/default/read-lock.nix
+    EOF
+    for entrypoint in build-rebar3-project realize; do
+      cat > "$out/share/rebar3-purifier/nix-lib/$entrypoint.nix" <<EOF
+    import ${runtimeSource}/pkgs/build-rebar3-project/$entrypoint.nix
+    EOF
+    done
     ln -s ${cli} "$out/share/rebar3-purifier/cli"
     ln -s ${purifierSrc} "$out/share/rebar3-purifier/purifier"
   ''
